@@ -63,5 +63,5 @@ export const assignTeams = (wordsArray: any) => {
 
   const shuffledArray = shuffleArray(w)
 
-  return shuffledArray
+  return { shuffledArray, count: { red, blue, black, neutral } }
 }

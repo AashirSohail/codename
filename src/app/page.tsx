@@ -10,6 +10,7 @@ import {
   usePlayersList,
   useMultiplayerState,
   getState,
+  setState,
   insertCoin,
   onPlayerJoin,
 } from 'playroomkit'
@@ -34,9 +35,11 @@ export default function Home() {
   //   )
   const playersThatHaveGuessed = usePlayersState('guessed')
 
-  const [randomWords, setRandomWords] = useMultiplayerState('randomWords')
+  //   const [randomWords, setRandomWords] = useMultiplayerState('randomWords')
   const [timer, setTimer] = useMultiplayerState('timer', 0)
   const [guesses, setGuesses] = useMultiplayerState('guesses', [])
+  const randomWords = getState('randomWords')
+  const cardCount = getState('cartCount')
 
   const haveIGuessed = playersThatHaveGuessed.find(
     (p: { player: { id: any }; state: any }) =>
@@ -153,9 +156,10 @@ export default function Home() {
         isRevealed: false,
       }
     })
-    const shuffledWordsToSave = assignTeams(randomWordsToSave)
-    setRandomWords(shuffledWordsToSave)
-    return shuffledWordsToSave
+    const { shuffledArray, count } = assignTeams(randomWordsToSave)
+    setState('randomWords', shuffledArray)
+    setState('cardCount', count)
+    return shuffledArray
   }
 
   useEffect(() => {
@@ -198,13 +202,39 @@ export default function Home() {
       return word.word === clickedWord?.word
     })
     if (!clickedWord.isRevealed) {
-      const newArray = randomWords
+      const count = getState('cardCount')
+      const newArray = randomWords.slice()
       newArray[index].isRevealed = true
-      setRandomWords([...newArray], true)
+      setState('randomWords', newArray, true)
+
+      if (clickedWord.team === 'red') {
+        const newCount = { ...count }
+        newCount[clickedWord.team] = count[clickedWord.team] - 1
+        setState('cartCount', newCount)
+        return
+      }
+      if (clickedWord.team === 'blue') {
+        const newCount = { ...count }
+        newCount[clickedWord.team] = count[clickedWord.team] - 1
+        setState('cartCount', newCount)
+        return
+      }
+      if (clickedWord.team === 'black') {
+        const newCount = { ...count }
+        newCount[clickedWord.team] = count[clickedWord.team] - 1
+        setState('cartCount', newCount)
+        return
+      }
+      if (clickedWord.team === 'neutral') {
+        const newCount = { ...count }
+        newCount[clickedWord.team] = count[clickedWord.team] - 1
+        setState('cartCount', newCount)
+        return
+      }
     }
   }
 
-  useEffect(() => console.log('randomWords', randomWords), [randomWords])
+  //   useEffect(() => console.log('count', cardCount), [cardCount])
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
@@ -212,13 +242,13 @@ export default function Home() {
         <StatsBar />
         <StatusBar message="Red is guessing" />
         <div className="flex flex-row justify-between items-center">
-          <div>Red Area</div>
+          <div>Red Area {cardCount?.red}</div>
           <WordGrid
             words={randomWords}
             player={myPlayer()}
             handleCardClick={revealCard}
           />
-          <div>Blue Area</div>
+          <div>Blue Area{cardCount?.blue}</div>
         </div>
         <InputBar />
       </div>
