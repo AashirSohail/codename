@@ -22,6 +22,7 @@ import StatusBar from '@/components/StatusBar'
 import WordGrid from '@/components/WordGrid'
 import InputBar from '@/components/InputBar'
 import TeamArea from '@/components/TeamArea'
+import PillButton from '@/components/PillButton'
 
 function sleep(ms: number | undefined) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -49,6 +50,17 @@ export default function Home() {
   const blueTeamPlayers = ([] = players.filter(
     (player: any) => player.state?.team === 'blue',
   ))
+
+  useEffect(() => {
+    const unAssignedPlayers = players.filter(
+      (player: any) => !player?.state?.team,
+    )
+    unAssignedPlayers.forEach((player: any) => assignPlayerTeam(player))
+    console.log(
+      'players',
+      players.map((player: any) => player?.state),
+    )
+  }, [players])
 
   //   function isCorrectGuess(guess: string) {
   //     return guess.toLowerCase() === currentWord.toLowerCase()
@@ -245,20 +257,22 @@ export default function Home() {
   }, [players])
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+    <main className="flex min-h-screen flex-col items-center py-8 justify-between bg-gradient-to-b from-[#8d6bed] to-purple-600 relative">
       <div>
         <StatsBar />
-        <StatusBar message={`${getState('teamTurn')} is guessing`} />
-        <div className="flex flex-row justify-between items-center">
-          <TeamArea team="red" cardCount={cardCount} players={players} />
-          <WordGrid
-            words={randomWords}
-            player={myPlayer()}
-            handleCardClick={revealCard}
-          />
-          <TeamArea team="blue" cardCount={cardCount} players={players} />
+        <div className="flex flex-col items-center gap-5">
+          <StatusBar message="Red is guessing" />
+          <div className="flex justify-between items-start gap-10">
+            <TeamArea team="red" cardCount={cardCount} players={players} />
+            <WordGrid
+              words={randomWords}
+              player={myPlayer()}
+              handleCardClick={revealCard}
+            />
+            <TeamArea team="blue" cardCount={cardCount} players={players} />
+          </div>
+          <InputBar />
         </div>
-        <InputBar />
       </div>
     </main>
   )
