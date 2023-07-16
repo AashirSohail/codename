@@ -2,7 +2,7 @@ const TeamArea = ({ team, cardCount, players }: any) => {
   return (
     <div>
       <div className="capitalize">
-        {team} Area{cardCount?.[team]}
+        Team {team} {cardCount?.[team]}
       </div>
       <div>Operative(s)</div>
 

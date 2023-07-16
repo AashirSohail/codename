@@ -36,7 +36,7 @@ export default function Home() {
   const [timer, setTimer] = useMultiplayerState('timer', 0)
   const [guesses, setGuesses] = useMultiplayerState('guesses', [])
   const randomWords = getState('randomWords')
-  const cardCount = getState('cartCount')
+  const cardCount = getState('cardCount')
 
   const haveIGuessed = playersThatHaveGuessed.find(
     (p: { player: { id: any }; state: any }) =>
@@ -95,42 +95,56 @@ export default function Home() {
   //     }
   //   }, [timer])
 
-  // When the host changes the turn
-  useEffect(() => {
-    if (isHost()) {
-      // Award points to players that have guessed correctly, reset the guessed state
-      players.forEach(
-        (player: {
-          getState: (arg0: string) => any
-          setState: (arg0: string, arg1: boolean) => void
-        }) => {
-          if (player.getState('guessed')) {
-            player.setState('score', (player.getState('score') || 0) + 1)
-          }
-          player.setState('guessed', false)
-        },
-      )
-    }
+  // When the turn ends
 
-    // Clear the canvas if the player is drawing
-    if (true) {
-      setTimer(60)
-      //   copyImage()
-      try {
-        // drawingAreaRef.current.reset()
-      } catch (e) {}
-      const intervalId = setInterval(() => {
-        // copyImage()
-        setTimer(getState('timer') - 1, true)
-      }, 1000)
-      setIntervalId(intervalId)
-    } else {
-      if (intervalId) {
-        clearInterval(intervalId)
-        setIntervalId(null)
-      }
-    }
+  useEffect(() => {
+    setTimer(60)
+    //   copyImage()
+    try {
+      // drawingAreaRef.current.reset()
+    } catch (e) {}
+    const intervalId = setInterval(() => {
+      // copyImage()
+      setTimer(getState('timer') - 1, true)
+    }, 1000)
+    setIntervalId(intervalId)
   }, [])
+
+  //   useEffect(() => {
+  //     if (isHost()) {
+  //       // Award points to players that have guessed correctly, reset the guessed state
+  //       players.forEach(
+  //         (player: {
+  //           getState: (arg0: string) => any
+  //           setState: (arg0: string, arg1: boolean) => void
+  //         }) => {
+  //           if (player.getState('guessed')) {
+  //             player.setState('score', (player.getState('score') || 0) + 1)
+  //           }
+  //           player.setState('guessed', false)
+  //         },
+  //       )
+  //     }
+
+  //     // Clear the canvas if the player is drawing
+  //     if (true) {
+  //       setTimer(60)
+  //       //   copyImage()
+  //       try {
+  //         // drawingAreaRef.current.reset()
+  //       } catch (e) {}
+  //       const intervalId = setInterval(() => {
+  //         // copyImage()
+  //         setTimer(getState('timer') - 1, true)
+  //       }, 1000)
+  //       setIntervalId(intervalId)
+  //     } else {
+  //       if (intervalId) {
+  //         clearInterval(intervalId)
+  //         setIntervalId(null)
+  //       }
+  //     }
+  //   }, [])
 
   const getRandomWords = () => {
     const randomIndexes: number[] = generateUniqueNumbers(1, 300, 25)
@@ -157,6 +171,9 @@ export default function Home() {
       getRandomWords()
       //   setTimer(60, true)
       setGuesses([], true)
+      setState('hintTimer', 180)
+      setState('guessTimer', 300)
+      setState('teamTurn', 'blue')
     }
     initGame()
   }, [])
@@ -168,10 +185,14 @@ export default function Home() {
     if (redTeamPlayers.length < blueTeamPlayers.length) {
       player.setState('team', 'red')
       console.log(`${player?.state?.profile?.name} joined the red team`)
+      player.setState('role', redTeamPlayers.length ? 'operative' : 'spymaster')
     } else {
       player.setState('team', 'blue')
       console.log(`${player?.state?.profile?.name} joined the blue team`)
-      player.setState('role', 'operative')
+      player.setState(
+        'role',
+        blueTeamPlayers.length ? 'operative' : 'spymaster',
+      )
     }
   }
 
@@ -227,7 +248,7 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div>
         <StatsBar />
-        <StatusBar message="Red is guessing" />
+        <StatusBar message={`${getState('teamTurn')} is guessing`} />
         <div className="flex flex-row justify-between items-center">
           <TeamArea team="red" cardCount={cardCount} players={players} />
           <WordGrid
