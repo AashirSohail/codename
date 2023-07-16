@@ -21,6 +21,7 @@ import StatsBar from '@/components/StatsBar'
 import StatusBar from '@/components/StatusBar'
 import WordGrid from '@/components/WordGrid'
 import InputBar from '@/components/InputBar'
+import TeamArea from '@/components/TeamArea'
 
 function sleep(ms: number | undefined) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -29,10 +30,6 @@ function sleep(ms: number | undefined) {
 export default function Home() {
   const players = usePlayersList(true)
   const [intervalId, setIntervalId] = useState<any>(null)
-  //   const [playerDrawing, setPlayerDrawing] = useMultiplayerState(
-  //     'playerDrawing',
-  //     players[0]?.id,
-  //   )
   const playersThatHaveGuessed = usePlayersState('guessed')
 
   //   const [randomWords, setRandomWords] = useMultiplayerState('randomWords')
@@ -52,17 +49,6 @@ export default function Home() {
   const blueTeamPlayers = ([] = players.filter(
     (player: any) => player.state?.team === 'blue',
   ))
-
-  useEffect(() => {
-    const unAssignedPlayers = players.filter(
-      (player: any) => !player?.state?.team,
-    )
-    unAssignedPlayers.forEach((player: any) => assignPlayerTeam(player))
-    console.log(
-      'players',
-      players.map((player: any) => player?.state),
-    )
-  }, [players])
 
   //   function isCorrectGuess(guess: string) {
   //     return guess.toLowerCase() === currentWord.toLowerCase()
@@ -158,6 +144,7 @@ export default function Home() {
     })
     const { shuffledArray, count } = assignTeams(randomWordsToSave)
     setState('randomWords', shuffledArray)
+    console.log('setting count', count)
     setState('cardCount', count)
     return shuffledArray
   }
@@ -202,39 +189,39 @@ export default function Home() {
       return word.word === clickedWord?.word
     })
     if (!clickedWord.isRevealed) {
-      const count = getState('cardCount')
       const newArray = randomWords.slice()
       newArray[index].isRevealed = true
       setState('randomWords', newArray, true)
 
+      const newCount = { ...cardCount }
+      newCount[clickedWord.team] = cardCount[clickedWord.team] - 1
+      setState('cartCount', { ...newCount })
+
       if (clickedWord.team === 'red') {
-        const newCount = { ...count }
-        newCount[clickedWord.team] = count[clickedWord.team] - 1
-        setState('cartCount', newCount)
         return
       }
       if (clickedWord.team === 'blue') {
-        const newCount = { ...count }
-        newCount[clickedWord.team] = count[clickedWord.team] - 1
-        setState('cartCount', newCount)
         return
       }
       if (clickedWord.team === 'black') {
-        const newCount = { ...count }
-        newCount[clickedWord.team] = count[clickedWord.team] - 1
-        setState('cartCount', newCount)
         return
       }
       if (clickedWord.team === 'neutral') {
-        const newCount = { ...count }
-        newCount[clickedWord.team] = count[clickedWord.team] - 1
-        setState('cartCount', newCount)
         return
       }
     }
   }
 
-  //   useEffect(() => console.log('count', cardCount), [cardCount])
+  useEffect(() => {
+    const unAssignedPlayers = players.filter(
+      (player: any) => !player?.state?.team,
+    )
+    unAssignedPlayers.forEach((player: any) => assignPlayerTeam(player))
+    console.log(
+      'players',
+      players.map((player: any) => player?.state),
+    )
+  }, [players])
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
@@ -242,13 +229,13 @@ export default function Home() {
         <StatsBar />
         <StatusBar message="Red is guessing" />
         <div className="flex flex-row justify-between items-center">
-          <div>Red Area {cardCount?.red}</div>
+          <TeamArea team="red" cardCount={cardCount} players={players} />
           <WordGrid
             words={randomWords}
             player={myPlayer()}
             handleCardClick={revealCard}
           />
-          <div>Blue Area{cardCount?.blue}</div>
+          <TeamArea team="blue" cardCount={cardCount} players={players} />
         </div>
         <InputBar />
       </div>
