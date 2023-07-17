@@ -1,15 +1,15 @@
-import { useEffect } from "react";
-import Image from "next/image";
+import { useEffect } from 'react'
+import Image from 'next/image'
 
 const styles: any = {
-  red: "bg-gradient-to-b from-darkRed to-lightRed",
-  blue: "bg-gradient-to-b from-darkBlue to-lightBlue",
-  black: "bg-gradient-to-b from-darkGray to-lightGray",
-  neutral: "bg-gradient-to-b from-darkYellow to-lightYellow",
-};
+  red: 'bg-gradient-to-b from-darkRed to-lightRed',
+  blue: 'bg-gradient-to-b from-darkBlue to-lightBlue',
+  black: 'bg-gradient-to-b from-darkGray to-lightGray',
+  neutral: 'bg-gradient-to-b from-darkYellow to-lightYellow',
+}
 
 const WordGrid = ({ words, player, handleCardClick }: any) => {
-  useEffect(() => {}, [words]);
+  useEffect(() => {}, [words])
 
   return (
     <div className="grid gap-3 grid-cols-5 grid-rows-5">
@@ -19,7 +19,7 @@ const WordGrid = ({ words, player, handleCardClick }: any) => {
           <div
             style={{
               pointerEvents: `${
-                player?.state?.role === "operative" ? "auto" : "none"
+                player?.state?.role === 'operative' ? 'auto' : 'none'
               }`,
             }}
             onClick={() => handleCardClick(word)}
@@ -29,16 +29,16 @@ const WordGrid = ({ words, player, handleCardClick }: any) => {
             ${
               word?.isRevealed
                 ? `${styles[word?.team]}`
-                : "bg-gradient-to-b from-[#C2B280] to-[#C19A6B]"
+                : 'bg-gradient-to-b from-[#C2B280] to-[#C19A6B]'
             }
             ${
-              player?.state?.role === "operative"
-                ? "cursor-pointer"
-                : "cursor-not-allowed"
+              player?.state?.role === 'operative'
+                ? 'cursor-pointer'
+                : 'cursor-not-allowed'
             }
             `}
           >
-            <div className="flex flex-col px-2 flex items-center justify-center relative h-16 border border-black">
+            <div className="flex flex-col px-2 items-center justify-center relative h-16 border border-black">
               {word?.word}
               <Image
                 src="/images/agent.png"
@@ -51,7 +51,7 @@ const WordGrid = ({ words, player, handleCardClick }: any) => {
           </div>
         ))}
     </div>
-  );
-};
+  )
+}
 
-export default WordGrid;
+export default WordGrid

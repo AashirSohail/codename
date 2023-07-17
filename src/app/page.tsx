@@ -13,6 +13,7 @@ import {
   setState,
   insertCoin,
   onPlayerJoin,
+  useGameState,
 } from 'playroomkit'
 import { generateUniqueNumbers, assignTeams } from '@/helper'
 import words from './words.json'
@@ -30,19 +31,29 @@ function sleep(ms: number | undefined) {
 
 export default function Home() {
   const players = usePlayersList(true)
-  const [intervalId, setIntervalId] = useState<any>(null)
-  const playersThatHaveGuessed = usePlayersState('guessed')
 
-  //   const [randomWords, setRandomWords] = useMultiplayerState('randomWords')
-  const [timer, setTimer] = useMultiplayerState('timer', 0)
+  //   const [guessIntervalId, setGuessIntervalId] = useState<any>(null)
+  //   const [hintIntervalId, setHintIntervalId] = useState<any>(null)
+  //   const playersThatHaveGuessed = usePlayersState('guessed')
+
+  const [hintTimer, setHintTimer] = useMultiplayerState('hintTimer', 0)
+  const [guessTimer, setGuessTimer] = useMultiplayerState('guessTimer', 0)
+  const [isHintTimerRunning, setIsHintTimerRunning] = useMultiplayerState(
+    'isHintTimerRunning',
+    false,
+  )
+  const [isGuessTimerRunning, setIsGuessTimerRunning] = useMultiplayerState(
+    'isGuessTimerRunning',
+    false,
+  )
+
   const [guesses, setGuesses] = useMultiplayerState('guesses', [])
+
   const randomWords = getState('randomWords')
   const cardCount = getState('cardCount')
-
-  const haveIGuessed = playersThatHaveGuessed.find(
-    (p: { player: { id: any }; state: any }) =>
-      p.player.id === myPlayer()?.id && p?.state,
-  )
+  //   const hintTimer = getState('hintTimer')
+  //   const guessTimer = getState('guessTimer')
+  const teamTurn = getState('teamTurn')
 
   const redTeamPlayers = ([] = players.filter(
     (player: any) => player.state?.team === 'red',
@@ -109,19 +120,6 @@ export default function Home() {
 
   // When the turn ends
 
-  useEffect(() => {
-    setTimer(60)
-    //   copyImage()
-    try {
-      // drawingAreaRef.current.reset()
-    } catch (e) {}
-    const intervalId = setInterval(() => {
-      // copyImage()
-      setTimer(getState('timer') - 1, true)
-    }, 1000)
-    setIntervalId(intervalId)
-  }, [])
-
   //   useEffect(() => {
   //     if (isHost()) {
   //       // Award points to players that have guessed correctly, reset the guessed state
@@ -175,17 +173,150 @@ export default function Home() {
     return shuffledArray
   }
 
+  //   const startHintTimer = () => {
+  //     if (getState('hintTimer') == -1) return
+  //     const intervalId = setInterval(() => {
+  //       console.log('hintTimer', getState('hintTimer'))
+  //       if (getState('hintTimer') - 1 >= 0)
+  //         setHintTimer(getState('hintTimer') - 1, true)
+  //       else stopHintTimer()
+  //     }, 1000)
+  //     setHintIntervalId(intervalId)
+  //   }
+
+  //   const startGuessTimer = () => {
+  //     if (getState('guessTimer') == -1) return
+
+  //     const intervalId = setInterval(() => {
+  //       console.log('guessTimer', getState('guessTimer'))
+
+  //       if (getState('guessTimer') - 1 >= 0)
+  //         setGuessTimer(getState('guessTimer') - 1, true)
+  //       else stopGuessTimer()
+  //     }, 1000)
+  //     stopHintTimer()
+  //     setGuessIntervalId(intervalId)
+  //   }
+
+  //   const stopHintTimer = () => {
+  //     clearInterval(hintIntervalId)
+  //     setState('hintTime', 180)
+  //   }
+
+  //   const stopGuessTimer = () => {
+  //     clearInterval(guessIntervalId)
+  //     setState('guessTime', 300)
+  //   }
+
+  // Function to start the guess timer when needed
+  const startGuessTimer = () => {
+    setIsGuessTimerRunning(true)
+  }
+  // Function to start the hint timer when needed
+
+  const startHintTimer = () => {
+    setIsHintTimerRunning(true)
+  }
+
+  // Function to start the guess timer when needed
+  const stopGuessTimer = () => {
+    setIsGuessTimerRunning(false)
+  }
+  // Function to stop the hint timer when needed
+
+  const stopHintTimer = () => {
+    setIsHintTimerRunning(false)
+  }
+
+  const changeTeamTurn = () => {
+    const teamTurn = getState('teamTurn')
+    teamTurn === 'red'
+      ? setState('teamTurn', 'blue')
+      : setState('teamTurn', 'red')
+    setState('hintTimer', 15)
+    setState('guessTimer', 20)
+    stopGuessTimer()
+    startHintTimer()
+  }
+
+  const decrementHintTimer = () => {
+    const number = isNaN(getState('hintTimer') - 1)
+      ? 0
+      : getState('hintTimer') - 1
+    console.log('hintTimer', number)
+
+    setHintTimer(number, true)
+  }
+
+  // Function to decrement guess timer every second
+  const decrementGuessTimer = () => {
+    const number = isNaN(getState('guessTimer') - 1)
+      ? 0
+      : getState('guessTimer') - 1
+    console.log('guessTimer', number)
+
+    setGuessTimer(number, true)
+  }
+
+  // Effect to run hint timer and handle switching to guess timer
+  useEffect(() => {
+    let hintInterval: any
+
+    if (isHintTimerRunning && hintTimer > 0 && isHost()) {
+      hintInterval = setInterval(decrementHintTimer, 1000)
+    }
+
+    // Switch to guess timer when hint timer reaches 0
+    if (hintTimer <= 0) {
+      stopHintTimer()
+      startGuessTimer()
+      clearInterval(hintInterval)
+    }
+
+    return () => clearInterval(hintInterval)
+  }, [isHintTimerRunning, hintTimer])
+
+  // Effect to run guess timer
+  useEffect(() => {
+    let guessInterval: any
+
+    if (isGuessTimerRunning && guessTimer > 0 && hintTimer <= 0 && isHost()) {
+      guessInterval = setInterval(decrementGuessTimer, 1000)
+    }
+
+    if (guessTimer <= 0 && hintTimer <= 0) {
+      stopGuessTimer()
+      changeTeamTurn()
+      clearInterval(guessInterval)
+    }
+
+    return () => clearInterval(guessInterval)
+  }, [isGuessTimerRunning, guessTimer, hintTimer])
+
+  //   useEffect(() => {
+  //     setTimer(60)
+  //     //   copyImage()
+  //     try {
+  //       // drawingAreaRef.current.reset()
+  //     } catch (e) {}
+  //     const intervalId = setInterval(() => {
+  //       // copyImage()
+  //       setTimer(getState('timer') - 1, true)
+  //     }, 1000)
+  //     // setIntervalId(intervalId)()
+  //   }, [])
+
   useEffect(() => {
     const initGame = async () => {
       await insertCoin()
 
       // Pick a random word and init all states
       getRandomWords()
-      //   setTimer(60, true)
       setGuesses([], true)
-      setState('hintTimer', 180)
-      setState('guessTimer', 300)
+      setState('hintTimer', 15)
+      setState('guessTimer', 20)
       setState('teamTurn', 'blue')
+      startHintTimer()
     }
     initGame()
   }, [])
@@ -261,7 +392,11 @@ export default function Home() {
       <div>
         <StatsBar />
         <div className="flex flex-col items-center gap-5">
-          <StatusBar message="Red is guessing" />
+          <StatusBar
+            hintTimer={hintTimer}
+            guessTimer={guessTimer}
+            teamTurn={teamTurn}
+          />
           <div className="flex justify-between items-start gap-10">
             <TeamArea team="red" cardCount={cardCount} players={players} />
             <WordGrid
