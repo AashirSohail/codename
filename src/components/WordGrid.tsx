@@ -8,7 +8,14 @@ const styles: any = {
   neutral: 'bg-gradient-to-b from-darkYellow to-lightYellow',
 }
 
-const WordGrid = ({ words, player, handleCardClick }: any) => {
+const WordGrid = ({
+  words,
+  player,
+  handleCardClick,
+  teamTurn,
+  guessTimer,
+  hintTimer,
+}: any) => {
   useEffect(() => {}, [words])
 
   return (
@@ -19,7 +26,12 @@ const WordGrid = ({ words, player, handleCardClick }: any) => {
           <div
             style={{
               pointerEvents: `${
-                player?.state?.role === 'operative' ? 'auto' : 'none'
+                player?.state?.role === 'operative' &&
+                player?.state?.team === teamTurn &&
+                hintTimer === 0 &&
+                guessTimer > 0
+                  ? 'auto'
+                  : 'none'
               }`,
             }}
             onClick={() => handleCardClick(word)}
@@ -38,8 +50,8 @@ const WordGrid = ({ words, player, handleCardClick }: any) => {
             }
             `}
           >
-            <div className="flex flex-col px-2 items-center justify-center relative h-16 border border-black">
-              {word?.word}
+            <div className="flex flex-col px-2 items-center justify-center relative w-28 h-16 border border-black">
+              {word?.isRevealed ? word?.word : ''}
               <Image
                 src="/images/agent.png"
                 height={20}

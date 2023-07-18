@@ -47,7 +47,7 @@ export default function Home() {
     false,
   )
 
-  const [guesses, setGuesses] = useMultiplayerState('guesses', [])
+  const [hint, setHint] = useMultiplayerState('guesses', { text: '', count: 0 })
 
   const randomWords = getState('randomWords')
   const cardCount = getState('cardCount')
@@ -243,7 +243,6 @@ export default function Home() {
     const number = isNaN(getState('hintTimer') - 1)
       ? 0
       : getState('hintTimer') - 1
-    console.log('hintTimer', number)
 
     setHintTimer(number, true)
   }
@@ -253,7 +252,6 @@ export default function Home() {
     const number = isNaN(getState('guessTimer') - 1)
       ? 0
       : getState('guessTimer') - 1
-    console.log('guessTimer', number)
 
     setGuessTimer(number, true)
   }
@@ -312,7 +310,6 @@ export default function Home() {
 
       // Pick a random word and init all states
       getRandomWords()
-      setGuesses([], true)
       setState('hintTimer', 15)
       setState('guessTimer', 20)
       setState('teamTurn', 'blue')
@@ -401,12 +398,19 @@ export default function Home() {
             <TeamArea team="red" cardCount={cardCount} players={players} />
             <WordGrid
               words={randomWords}
+              teamTurn={teamTurn}
+              hintTimer={hintTimer}
+              guessTimer={guessTimer}
               player={myPlayer()}
               handleCardClick={revealCard}
             />
             <TeamArea team="blue" cardCount={cardCount} players={players} />
           </div>
-          <InputBar />
+          {/* <InputBar
+            hintTimer={hintTimer}
+            teamTurn={teamTurn}
+            me={myPlayer()?.state}
+          /> */}
         </div>
       </div>
     </main>

@@ -8,8 +8,6 @@ const InputBar = ({ hintTimer, guessTimer, teamTurn }: any) => {
     if (guessTimer && hintTimer <= 0) {
       setMessage(`${teamTurn} operative(s) turn`)
     }
-
-    console.log(hintTimer, guessTimer, teamTurn)
   }, [hintTimer, guessTimer, teamTurn])
 
   const [message, setMessage] = useState('')
