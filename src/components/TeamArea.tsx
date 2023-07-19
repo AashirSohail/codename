@@ -1,7 +1,19 @@
 import PillButton from '@/components/PillButton'
 import Image from 'next/image'
 
-const TeamArea = ({ team, cardCount, players }: any) => {
+const TeamArea = ({
+  team,
+  cardCount,
+  players,
+  me,
+  hintTimer,
+  guessTimer,
+  teamTurn,
+}: any) => {
+  const setRole = (team: string, role: string) => {
+    me.setState('team', team)
+    me.setState('role', role)
+  }
   return (
     <div>
       <div
@@ -33,7 +45,10 @@ const TeamArea = ({ team, cardCount, players }: any) => {
                     <span key={player.id}>{player?.state?.profile?.name}</span>
                   ))}
               </span>
-              <PillButton text="Join as Operative(s)" />
+              <PillButton
+                text="Join as Operative(s)"
+                handleButtonClick={() => setRole(team, 'operative')}
+              />
             </div>
             <div className="flex flex-col">
               <span>Spymaster(s)</span>
@@ -48,7 +63,10 @@ const TeamArea = ({ team, cardCount, players }: any) => {
                     <span key={player.id}>{player?.state?.profile?.name}</span>
                   ))}
               </span>
-              <PillButton text="Join as Spymaster(s)" />
+              <PillButton
+                text="Join as Spymaster(s)"
+                handleButtonClick={() => setRole(team, 'spymaster')}
+              />
             </div>
           </div>
           <span className="text-5xl font-semibold p-2">
